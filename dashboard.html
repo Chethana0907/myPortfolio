@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./img/dashboardIcon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	
+    <style>
+	/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #ecf0f1;
+    padding: 15px;
+    width: 100%;
+    text-align: center;
+    display: block;
+}
+
+.sidebar a:hover {
+    background-color: #34495e;
+}
+
+.main-content {
+    
+    padding: 20px;
+}
+
+.top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 250px;
+    margin-right: 20px;
+    cursor: move;
+}
+
+.card:last-child {
+    margin-right: 0;
+}
+
+.card h3 {
+    margin-top: 0;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 250px;
+}
+
+.date-range input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+    flex: 1;
+}
+
+.date-range button {
+    padding: 10px 15px;
+    border: none;
+    background-color: #2c3e50;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.date-range button:hover {
+    background-color: #34495e;
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.flex-item {
+    flex: 1;
+    min-width: 300px;
+}
+
+.chart-container {
+    position: relative;
+    height: 200px;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.ui-sortable-placeholder {
+    background: #ccc;
+    border: 2px dashed #999;
+    visibility: visible !important;
+}
+
+	</style>
+</head>
+<body>
+   <!-- <div class="sidebar">
+        <h2>LOGO</h2>
+        <a href="#">Dashboard</a>
+        <a href="#">Portfolio</a>
+        <a href="#">Investments</a>
+        <a href="#">Market Analysis</a>
+        <a href="#">Transactions</a>
+        <a href="#">Settings</a>
+        <a href="#">Logout</a>
+    </div>-->
+    <div class="main-content">
+        <div class="top-section">
+            <div class="card"> <!-- Make these containers sortable -->
+                <h3>1 Dollar Value</h3>
+                <p id="exchange-rate"></p>
+            </div>
+            <div class="card">
+                <h3>Gold Rate today in Bangalore</h3>
+                <p id="gold-rate"></p>
+            </div>
+            <div class="card">
+                <h3>Bangalore Weather Today</h3>
+                <p id="weatherData"></p>
+            </div>
+            <div class="card">
+                <h3>News Today</h3>
+                <a id ="newsData"></a>
+            </div>
+            <!--<div class="date-range">
+                <input type="text" placeholder="DD/MM/YYYY - DD/MM/YYYY">
+                <button>Export</button>
+            </div>-->
+        </div>
+        <div class="flex-container sortable">
+            <div class="flex-item card">
+                <h3>Dollar Value from past 10 years </h3>
+                <div class="chart-container">
+                    <canvas id="exchangeRateChart"></canvas>
+                </div>
+            </div>
+            <div class="flex-item card">
+                <h3>Ruling Political Parties in India</h3>
+                <div class="chart-container">
+                    <canvas id="donutChart"></canvas>
+                </div>
+            </div>
+            <div class="flex-item card">
+                <h3>Gold Rate from past 10 years</h3>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+            <div class="flex-item card">
+                <h3>Petrol Rate from past 10 years</h3>
+                <div class="chart-container">
+                    <canvas id="petrolChart"></canvas>
+                </div>
+            </div>
+            <div class="flex-item card">
+                 <div class="container">
+        <h3>Inflation Rates in India (Past 5 Years)</h3>
+        <table id="inflationTable">
+            <thead>
+                <tr>
+                    <th title="Year when the data was recorded">Year</th>
+                    <th title="Consumer Price Index (CPI) measures changes in the price level of a weighted average market basket of consumer goods and services">CPI Inflation</th>
+                    <th title="Wholesale Price Index (WPI) measures the changes in the price of goods at the wholesale level">WPI Inflation</th>
+                    <th title="Food Inflation measures changes in the price level of food items">Food Inflation</th>
+                    <th title="Core Inflation excludes food and energy prices to provide a clearer picture of underlying inflation trends">Core Inflation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2019</td>
+                    <td>3.73%</td>
+                    <td>2.76%</td>
+                    <td>3.10%</td>
+                    <td>3.50%</td>
+                </tr>
+                <tr>
+                    <td>2020</td>
+                    <td>6.62%</td>
+                    <td>1.22%</td>
+                    <td>4.40%</td>
+                    <td>5.90%</td>
+                </tr>
+                <tr>
+                    <td>2021</td>
+                    <td>5.13%</td>
+                    <td>0.63%</td>
+                    <td>3.80%</td>
+                    <td>4.50%</td>
+                </tr>
+                <tr>
+                    <td>2022</td>
+                    <td>6.70%</td>
+                    <td>2.19%</td>
+                    <td>4.60%</td>
+                    <td>5.80%</td>
+                </tr>
+                <tr>
+                    <td>2023</td>
+                    <td>5.65%</td>
+                    <td>1.85%</td>
+                    <td>4.20%</td>
+                    <td>5.10%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+            </div>
+            <div class="flex-item card">
+                <h3>Ruling Political Parties in Karnataka</h3>
+                <div class="chart-container">
+                    <canvas id="donutChartState"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+// script.js
+$(document).ready(function() {
+$('#inflationTable th').tooltip();
+    // Load positions from localStorage
+    function loadPositions() {
+        var positions = JSON.parse(localStorage.getItem('positions')) || [];
+        positions.forEach(function(position) {
+            var element = $('#' + position.id);
+            element.css({
+                left: position.left,
+                top: position.top
+            });
+        });
+    }
+
+    // Save positions to localStorage
+    function savePositions() {
+        var positions = [];
+        $('.grid-item, .card').each(function() {
+            var element = $(this);
+            var position = {
+                id: element.attr('id'),
+                left: element.css('left'),
+                top: element.css('top')
+            };
+            positions.push(position);
+        });
+        localStorage.setItem('positions', JSON.stringify(positions));
+    }
+
+    // Make the top-section cards sortable and draggable
+    $(".top-section").sortable({
+        items: ".card",
+        containment: ".main-content",
+        tolerance: "pointer",
+        placeholder: "ui-sortable-placeholder",
+        start: function(event, ui) {
+            ui.placeholder.height(ui.helper.outerHeight());
+        },
+        stop: function(event, ui) {
+            ui.item.css("transform", "none");
+            savePositions();
+        }
+    });
+
+    // Make the flex-container cards sortable and draggable
+    $(".flex-container").sortable({
+        items: ".flex-item",
+        containment: ".main-content",
+        tolerance: "pointer",
+        placeholder: "ui-sortable-placeholder",
+        start: function(event, ui) {
+            ui.placeholder.height(ui.helper.outerHeight());
+        },
+        stop: function(event, ui) {
+            ui.item.css("transform", "none");
+            savePositions();
+        }
+    });
+
+  
+	//Line chart
+	const ctx = document.getElementById('exchangeRateChart').getContext('2d');
+    const exchangeRateChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+            datasets: [{
+                label: 'USD to INR',
+                data: [58.50, 62.00, 67.00, 68.50, 70.00, 72.00, 75.00, 77.00, 80.00, 82.00, 84.39],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                backgroundColor: 'rgba(161, 249, 248, 0.5)', // Grey color
+                fill: true
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Exchange Rate (INR)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Year'
+                    }
+                }
+            }
+        }
+    });
+	
+
+    var barCtx = document.getElementById('barChart').getContext('2d');
+    var barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+            datasets: [{
+                label: 'Gold Rate (INR per gram)',
+                data: [2800, 2634, 2862, 2966, 3143, 3522, 4865, 4872, 5267, 6533, 7151],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Year'
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Amount'
+                    }
+                }
+            }
+        }
+    });
+
+    var petrolCtx = document.getElementById('petrolChart').getContext('2d');
+    var petrolChart = new Chart(petrolCtx, {
+        type: 'bar',
+        data: {
+            labels: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+            datasets: [{
+                label: 'Petrol Rate',
+                data: [72.43,60.50,64.38,69.99,78.52,73.83,80.43,95.41,95.00,98.00,100.00],
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Year'
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Amount'
+                    }
+                }
+            }
+        }
+    });
+
+    var assetPieCtx = document.getElementById('assetPieChart').getContext('2d');
+    var assetPieChart = new Chart(assetPieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Stocks', 'Bonds', 'Real Estate', 'Cash'],
+            datasets: [{
+                label: 'Asset Allocation',
+                data: [50, 20, 20, 10],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    // Load the saved positions when the page loads
+    loadPositions();
+});
+
+const donutStatectx = document.getElementById('donutChartState').getContext('2d');
+    const donutChartState = new Chart(donutStatectx, {
+        type: 'doughnut',
+        data: {
+            labels: ['INC', 'BJP', 'Others'],
+            datasets: [{
+                label: 'Ruling Political Parties',
+                data: [135, 66, 23],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Ruling Political Parties in Karnataka'
+                }
+            }
+        }
+    });
+
+var donutctx = document.getElementById('donutChart').getContext('2d');
+    var donutChart = new Chart(donutctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['BJP', 'INC', 'AAP', 'ZPM'],
+            datasets: [{
+                
+                data: [19, 8, 2, 1],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(0, 230,0,0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(0, 255, 0, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                title: {
+                    display: false,
+                    text: 'Ruling Political Parties in India'
+                }
+            }
+        }
+    });
+
+//dollar calculation
+$(document).ready(function() {
+    function fetchExchangeRate() {
+        $.ajax({
+            url: 'https://open.er-api.com/v6/latest/USD',
+            type: 'GET',
+            success: function(response) {
+                var rate = response.rates.INR;
+                $('#exchange-rate').text("₹"+rate.toFixed(2));
+            },
+            error: function() {
+                $('#exchange-rate').text('API Error');
+            }
+        });
+		
+    }
+	
+	//weather api
+	function fetchWeather() {
+        $.ajax({
+            url: 'https://api.weatherstack.com/current?access_key=3242455d34a256bb56d6b0ad2972b2c6&query=Bangalore',
+            type: 'GET',
+            success: function(response) {
+			//var data = JSON.parse(response); 
+				//var weatherData = data.current["temperature"]; 
+               var weatherData = response.current.temperature;
+                $('#weatherData').text(weatherData+" °C");
+            },
+            error: function() {
+                $('#weatherData').text('API Error');
+            }
+        });
+		
+    }
+	
+	function fetchLatestNews() {
+        $.ajax({
+            url: 'https://newsdata.io/api/1/news?apikey=pub_60354df56d61aa5ed2aacef5bd9f86ddb740d&q=latest%20news&country=in&language=en&category=top ',
+            type: 'GET',
+            success: function(response) {
+			//var data = JSON.parse(response); 
+				//var weatherData = data.current["temperature"]; 
+               //var news = response.title;
+			   var news = response.results[0].title;
+			   var Url = response.results[0].link;
+                $('#newsData').text(news);
+				$('#newsData').attr('href', Url);
+				$('#newsData').attr('target', '_blank');
+            },
+            error: function() {
+                $('#newsData').text('API Error');
+            }
+        });
+		
+    }
+	
+	
+	function fetchGoldRate() {
+        $.ajax({
+            url: 'https://gold-silver-rates-india.p.rapidapi.com/api/Fetch-Gold-Silver/?city=Bangalore&state=Karnataka',
+            type: 'GET',
+			headers:{
+			"x-rapidapi-key":"5c84e2d242mshda8da898589a987p1669e3jsn909ef5a11cb8",
+			"x-rapidapi-host":"gold-silver-rates-india.p.rapidapi.com"
+			
+			},
+            success: function(response) {
+				var data = JSON.parse(response); 
+				var goldRate = data["gold rate"]; 
+               // var rate = response;
+                $('#gold-rate').text("₹"+goldRate);
+            },
+            error: function() {
+                $('#gold-rate').text('API Error');
+            }
+        });
+    }
+
+   fetchExchangeRate();
+	fetchGoldRate();
+	fetchWeather();
+	fetchLatestNews();
+});
+
+</script>
+</body>
+</html>

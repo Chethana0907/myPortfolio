@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management</title>
+	<link rel="icon" type="image/x-icon" href="./img/taskIcon.png">
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<style>
+	body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    flex-wrap: wrap;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 70%;
+    
+    margin: 10px;
+    
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-container, .task-list-container, .chart-container {
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input, select, button {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+<!--button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+}-->
+	button {
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #31708f;
+            background-color: #d9edf7;
+            box-shadow: 0 4px #31708f;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            border-radius: 60px;
+        }
+        button:hover {
+            background-color: #d9edf7;
+            box-shadow: 0 4px #31708f;
+            border-radius: 60px;
+        }
+        button:active {
+            box-shadow: 0 2px #31708f;
+            transform: translateY(2px);
+            border-radius: 60px;
+        }
+
+
+
+#taskList .task {
+    background-color: #f9f9f9;
+    border-left: 5px solid;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#taskList .task.high { border-left-color: #ff0000; }
+#taskList .task.medium { border-left-color: #ff9800; }
+#taskList .task.low { border-left-color: #00bcd4; }
+ #draggablePanelList .panel-heading {
+        cursor: move;
+    }
+ #draggablePanelList2 .panel-heading {
+        cursor: move;
+    }
+	.task{
+	background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+   // width: 25%;
+    
+    margin: 10px;
+	//position:relative;
+	//top:-56rem;
+	}
+	
+	
+	.addTask{
+	background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    
+    margin: 10px;
+	
+	}
+	
+	
+	.taskList > *
+	{background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 70%;
+    margin: 10px;
+	}
+	
+	//Chart
+	.chart-heading {
+  font-family: "Rubik", sans-serif;
+  color: #023047;
+  text-transform: uppercase;
+  font-size: 24px;
+  text-align: center;
+}
+
+.chart-container {
+  width: 200px;
+}
+
+.programming-stats {
+  font-family: "Rubik", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 0 auto;
+  width: fit-content;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  padding: 8px 32px;
+  color: #023047;
+  transition: all 400ms ease;
+}
+
+.programming-stats:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
+}
+
+.programming-stats .details ul {
+  list-style: none;
+  padding: 0;
+}
+
+.programming-stats .details ul li {
+  font-size: 16px;
+  margin: 12px 0;
+  text-transform: uppercase;
+}
+
+.programming-stats .details .percentage {
+  font-weight: 700;
+  color: #e63946;
+}
+
+	</style>
+</head>
+<body>
+    <!--<div class="container" id="formContainer" >
+        <h1>Task Management App</h1>
+
+        <div>
+		<div class="container" >
+            <form id="taskForm">
+                <input type="text" id="taskName" placeholder="Task Name" required><br>
+                <input type="date" id="taskDate" required><br>
+                <input type="time" id="taskTime" required><br>
+                <select id="taskPriority">
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select><br>
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+    <!--</div>
+
+    <div class="container" id="taskListContainer" >
+        <h2>Tasks</h2>
+        <div id="taskList"></div>
+    </div>
+
+    <div class="container" id="chartContainer" >
+        <h2>Task Summary</h2>
+        <canvas id="taskChart" width="400" height="400"></canvas>
+    </div>-->
+
+
+
+
+<div style="width:100%">
+<h1>Task Management</h1>
+<div class="row" style="margin-left:2rem;">
+
+  <div class="col-md-3 addTask">
+
+  <!--<div class="container"> 
+  <div class="form-container task">-->
+            <form id="taskForm">
+                <input type="text" id="taskName" placeholder="Task Name" required><br>
+                <p>Due Date</p><input type="date" id="taskDate"  required><br>
+                <p>Due Time</p><input type="time" id="taskTime" required><br>
+                <p>Priority</p><select id="taskPriority">
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select><br>
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+  <!-- </div>
+ </div>-->
+ <div class="col-md-8">
+ <div class="addTask"> 
+  <ul id="draggablePanelList" class="list-unstyled">
+     <!-- <li class="panel panel-info">
+          <div class="panel-heading">You can drag this panel.</div>
+          <div class="panel-body"><div class="form-container task">
+            <form id="taskForm">
+                <input type="text" id="taskName" placeholder="Task Name" required><br>
+                <input type="date" id="taskDate" required><br>
+                <input type="time" id="taskTime" required><br>
+                <select id="taskPriority">
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select><br>
+                <button type="submit">Add Task</button>
+            </form>
+        </div></div>
+      </li>-->
+	  
+      <li class="panel panel-info">
+          <div class="panel-heading"><h4 style="display: inline;">Tasks</h4>
+            <img src="img/drag-and-dropIcon.png" alt="Image" height="40px" width="40px" style="position: relative;left:89%;">
+        </div>
+          <div class="panel-body"><div>
+        <!--<h2>Tasks</h2>-->
+        <div id="taskList"></div>
+    </div></div>
+      </li>
+      <li class="panel panel-info">
+          <div class="panel-heading showHide"><h4 style="display: inline;">Task Summary</h4>
+            <img src="img/drag-and-dropIcon.png" alt="Image" height="40px" width="40px" style="position: relative;left:81%;">
+        </div>
+          <div class="panel-body hideShow"><div class="container" id="chartContainer" style="width:50%" >
+       
+         <canvas id="chart" width="400" height="400"></canvas>
+    </div>
+     <!-- <li class="panel panel-info">
+          <div class="panel-heading ">You can drag this panel too.</div>
+          <div class="panel-body ">Another content panel here...</div>
+      </li>-->
+  </ul>
+  </div>
+  </div>
+<!--<div class="row">
+  <div class="col-xs-2">
+  <div id="draggablePanelList2" class="">
+      <div class="panel panel-default">
+          <div class="panel-heading">You cand drag this panel.</div>
+          <div class="panel-body">Content hedfsre ...</div>
+      </div>
+      <div class="panel panel-danger">
+          <div class="panel-heading">You canfd drag this panel.</div>
+          <div class="panel-body">Content hdsfere ...</div>
+      </div>
+  </div>
+    </div><!--end col
+  </div>end row-->
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
+      <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+	//$(".hideShow").hide();
+	let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+displayTasks();
+
+updateChart();
+
+
+
+document.getElementById('taskForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    let taskName = document.getElementById('taskName').value;
+    let taskDate = document.getElementById('taskDate').value;
+    let taskTime = document.getElementById('taskTime').value;
+    let taskPriority = document.getElementById('taskPriority').value;
+
+    let task = {
+        name: taskName,
+        date: taskDate,
+        time: taskTime,
+        priority: taskPriority,
+        completed: false,
+        createdAt: new Date().toLocaleString()
+    };
+
+    tasks.push(task);
+	//$('#taskList').find('*').addClass("taskContainer");
+	//$('#taskList').children().addClass('task');
+	// $("#taskList")
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    displayTasks();
+    updateChart();
+	
+    document.getElementById('taskForm').reset();
+});
+
+function displayTasks() {
+    let taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+
+    tasks.forEach((task, index) => {
+        let taskDiv = document.createElement('div');
+       // taskDiv.classList.add('task');
+        taskDiv.classList.add(task.priority.toLowerCase());
+        if (task.completed) {
+            taskDiv.style.borderLeftColor = '#4caf50';
+            taskDiv.style.backgroundColor = '#7ff5b6';
+            taskDiv.innerHTML += '<p><strong>Task is done!</strong></p>';
+        }
+
+        let taskInfo = `
+            <p><strong>${task.name}</strong></p>
+            <p>Priority: ${task.priority}</p>
+            <p>Due: ${task.date} ${task.time}</p>
+            <p>Created at: ${task.createdAt}</p>
+            <button onclick="completeTask(${index})" ${task.completed ? 'disabled' : ''}>Mark as Done</button>
+            <button onclick="deleteTask(${index})">Delete</button>
+           <!-- <button onclick="undoTask(${index})">Undo</button>-->
+            <button onclick="editTask(${index})">Edit</button>
+        `;
+
+        taskDiv.innerHTML = taskInfo;
+        taskList.appendChild(taskDiv);
+		$('#taskList').children().addClass('task');
+    });
+	
+	
+}
+
+function completeTask(index) {
+    tasks[index].completed = true;
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    displayTasks();
+    updateChart();
+	
+}
+
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    displayTasks();
+    updateChart();
+}
+
+function undoTask(index) {
+    tasks[index].completed = false;
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    displayTasks();
+    updateChart();
+}
+
+function editTask(index) {
+    let task = tasks[index];
+    document.getElementById('taskName').value = task.name;
+    document.getElementById('taskDate').value = task.date;
+    document.getElementById('taskTime').value = task.time;
+    document.getElementById('taskPriority').value = task.priority;
+    updateChart();
+    deleteTask(index);
+}
+
+
+
+
+
+    jQuery(function($) {
+        var panelList = $('#draggablePanelList');
+
+        panelList.sortable({
+            // Only make the .panel-heading child elements support dragging.
+            // Omit this to make then entire <li>...</li> draggable.
+            handle: '.panel-heading', 
+            update: function() {
+                $('.panel', panelList).each(function(index, elem) {
+                     var $listItem = $(elem),
+                         newIndex = $listItem.index();
+
+                     // Persist the new indices.
+                });
+            }
+        });
+    });
+
+    jQuery(function($) {
+        var panelList2 = $('#draggablePanelList2');
+
+        panelList2.sortable({
+            // Only make the .panel-heading child elements support dragging.
+            // Omit this to make then entire <li>...</li> draggable.
+            handle: '.panel-heading', 
+            update: function() {
+                $('.panel', panelList2).each(function(index, elem) {
+                     var $listItem = $(elem),
+                         newIndex = $listItem.index();
+
+                     // Persist the new indices.
+                });
+            }
+        });
+    });
+	
+function updateChart() {
+
+      let ctx = document.getElementById('chart').getContext('2d');
+	  let completedTasks = tasks.filter(task => task.completed).length;
+    let pendingTasks = tasks.filter(task => !task.completed).length;
+	
+        var exists = Chart.getChart('chart');
+exists?.destroy();
+   
+       let chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Pending'],
+          datasets: [{
+            label: 'Tasks',
+            data: [completedTasks, pendingTasks],
+            backgroundColor: ['#00C49F', '#FFBB28'],
+            borderColor: ['#00C49F', '#FFBB28'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true
+              }
+            }]
+          }
+        }
+      });
+    }
+	
+	
+	
+	
+	</script>
+</body>
+</html>
