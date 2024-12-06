@@ -156,6 +156,13 @@ function spark(event) {
                    
                     window.open("./dashboard.html");
                      });
+					 
+					 
+					 
+					 
+	$(".linkedIn").click(function(){
+		window.open("https:www.linkedin.com/in/chethana-g-185a02121");
+    });
   /*const settings = {
 	async: true,
 	crossDomain: true,
