@@ -161,7 +161,7 @@ function spark(event) {
 					 
 					 
 	$(".linkedIn").click(function(){
-		window.open("https:www.linkedin.com/in/chethana-g-185a02121");
+		window.open("https://www.linkedin.com/in/chethana-g-185a02121");
     });
   /*const settings = {
 	async: true,
